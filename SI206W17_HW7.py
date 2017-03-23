@@ -86,21 +86,23 @@ def get_user_tweets(a):
 # Below we have provided interim outline suggestions for what to do, sequentially, in comments.
 
 # Make a connection to a new database tweets.db, and create a variable to hold the database cursor.
-# my_connect=sqlite3.connect('twitter.db')
-# curs=my_connect.cursor()
-# curs.execute('DROP TABLE IF EXISTS Tweets')
-# new_table='CREATE TABLE IF NOT EXISTS'
-# new_table+= 'Tweets (tweet_id INTEGER PRIMARY KEY,'
-# new_table+= 'author TEXT, time_posted TIMESTAMP, tweet_text TEXT, reweets INTEGER)'
-# curs.execute(new_table)
-# statement = 'DELETE FROM Tweets'
-# curs.execute(statement)
-# my_connect.commit()
+connect=sqlite3.connect('twitter.db')
+cur=connect.cursor()
+cur.execute('DROP TABLE IF EXISTS Tweets')
+
+new_table ='CREATE TABLE IF NOT EXISTS '
+new_table+= 'Tweets (tweet_id INTEGER, author TEXT, time_posted TIMESTAMP, tweet_text TEXT, retweets INTEGER)'
+cur.execute(new_table)
+statement = 'DELETE FROM Tweets'
+cur.execute(statement)
+connect.commit()
 umsi_tweets=get_user_tweets(a)
-# statement = 'INSERT INTO Tweets VALUES (items["id"],items["user"]["screen_name"],items["created_at"], items["text"],items["retweet count"])'
-# for items in umsi_tweets[a]:
-# 	curs.execute(statement, items)
-# my_connect.commit()
+statement = 'INSERT INTO Tweets VALUES (?,?,?,?,?)'
+
+for items in umsi_tweets:
+	t=(items["id"],items["user"]["screen_name"],items["created_at"],items["text"],items["retweet_count"])
+	cur.execute(statement,t)
+connect.commit()
 
 
 
@@ -136,16 +138,28 @@ umsi_tweets=get_user_tweets(a)
 
 # Select from the database all of the TIMES the tweets you collected were posted and fetch all the tuples that contain them in to the variable tweet_posted_times.
 
+t= 'SELECT time_posted FROM Tweets'
+cur.execute(t)
+tweet_posted_times=cur.fetchall()
+
 
 # Select all of the tweets (the full rows/tuples of information) that have been retweeted MORE than 2 times, and fetch them into the variable more_than_2_rts.
+q= 'SELECT * FROM Tweets WHERE retweets>2 and instr(tweet_text,"RT")'
+cur.execute(q)
+more_than_2_rts=cur.fetchall()
+#intresting not all of the tweets begin with rt 
+# Select all of the TEXT values of te tweets that are retweets of another account (i.e. have "RT" at the beginning of the tweet text). Save the FIRST ONE from that group of text values in the variable first_rt. Note that first_rt should contain a single string value, not a tuple.
+z='SELECT tweet_text FROM Tweets WHERE instr(tweet_text,"RT")' 
+cur.execute(z)
+q=cur.fetchall()
+first_rt=q[0][0]
 
 
 
-# Select all of the TEXT values of the tweets that are retweets of another account (i.e. have "RT" at the beginning of the tweet text). Save the FIRST ONE from that group of text values in the variable first_rt. Note that first_rt should contain a single string value, not a tuple.
 
 
 
-# Finally, done with database stuff for a bit: write a line of code to close the cursor to the database.
+# Finally, done with database stuff for a bit: write a lin(:?@)[a-zA-Z0-9_]+e of code to close the cursor to the database.
 
 
 
@@ -161,7 +175,10 @@ umsi_tweets=get_user_tweets(a)
 
 # Also note that the SET type is what this function should return, NOT a list or tuple. We looked at very briefly at sets when we looked at set comprehensions last week. In a Python 3 set, which is a special data type, it's a lot like a combination of a list and a dictionary: no key-value pairs, BUT each element in a set is by definition unique. You can't have duplicates.
 
-# If you want to challenge yourself here -- this function definition (what goes under the def statement) CAN be written in one line! Definitely, definitely fine to write it with multiple lines, too, which will be much easier and clearer.
+# If you want to challenge yourself here -- this function definition (what goes under the def statement) CAN be written in one line! Definitely, definitely fine to write it with multiple lines, too, which will be much easier and clearer
+get_twitter_users=lambda x: set(re.findall("(?:@)([a-zA-Z0-9_]+)",x))
+
+
 
 
 
