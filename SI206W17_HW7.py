@@ -157,7 +157,7 @@ first_rt=q[0][0]
 
 
 
-
+conn.close()
 
 # Finally, done with database stuff for a bit: write a lin(:?@)[a-zA-Z0-9_]+e of code to close the cursor to the database.
 
